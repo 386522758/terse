@@ -63,3 +63,18 @@ def test_double_dash_separates_command(capsys):
     out = capsys.readouterr().out
     assert rc == 0
     assert "hello" in out
+
+
+def test_stderr_is_merged_into_output(capsys):
+    code = "import sys; print('to-stdout'); print('to-stderr', file=sys.stderr)"
+    rc = main(["--no-stats", sys.executable, "-c", code])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "to-stdout" in out
+    assert "to-stderr" in out
+
+
+def test_timeout_kills_command_and_returns_124(capsys):
+    code = "import time; print('starting'); time.sleep(30)"
+    rc = main(["--no-stats", "--timeout", "0.5", sys.executable, "-c", code])
+    assert rc == 124

@@ -32,7 +32,7 @@ E       assert 504 == 200
 tests/test_api.py:88: AssertionError
 =================== 1 failed, 213 passed in 12.40s ====================
 
-[terse] pytest · 5,578→423 tokens (-92%) · ANSI stripped; collapsed 200 passing-test lines
+[terse] pytest · 5,578→423 tokens (-92%) · 12.3KB→793B · stripped ANSI escape codes; collapsed 200 passing-test lines
 ```
 
 The failure, the traceback, and the summary survive untouched. The 200 passing lines
@@ -69,10 +69,13 @@ $ python examples/benchmark.py
 Pure standard library — nothing to pull in.
 
 ```bash
-pip install terse-cli          # from PyPI (package name: terse-cli, command: terse)
-# or, straight from source:
+# From source (works today):
 git clone https://github.com/386522758/terse && cd terse && pip install -e .
-# or just drop src/terse on your PATH — there are no dependencies.
+
+# Or just drop src/terse on your PATH — there are no dependencies.
+
+# From PyPI (planned — not yet published):
+#   pip install terse-cli       # package name: terse-cli, command: terse
 ```
 
 Requires Python 3.8+.
@@ -180,11 +183,13 @@ original untouched. Worst case it does nothing; it never works against you.
 ```bash
 pip install -e ".[dev]"
 pytest -q                  # run the test suite
+ruff check .               # lint
 python examples/benchmark.py
 ```
 
-Contributions welcome — new profiles are easy to add: write one function that takes a list of
-lines and returns a smaller list, register it in `PROFILES`, and add a case to the benchmark.
+Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). New profiles are easy to add:
+write one function that takes a list of lines and returns a smaller list, register it in
+`PROFILES`, and add a case to the benchmark.
 
 ## License
 

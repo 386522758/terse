@@ -56,3 +56,11 @@ def test_never_expands_tiny_input():
     result = compress(raw)
     assert result.compressed_tokens <= result.original_tokens
     assert result.token_savings_pct >= 0
+
+
+def test_compress_preserves_crlf_content():
+    # Regression: CRLF input used to be wiped to an empty string.
+    raw = "build started\r\nWARNING: deprecated flag\r\nbuild ok\r\n"
+    result = compress(raw, profile="generic")
+    for line in ("build started", "WARNING: deprecated flag", "build ok"):
+        assert line in result.text

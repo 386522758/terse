@@ -57,7 +57,7 @@ def pip_log() -> str:
     for d in deps:
         lines.append(f"Collecting {d}")
         lines.append(f"  Downloading {d}-1.2.3-py3-none-any.whl (1.4 MB)")
-        lines.append(f"     |████████████████████████████████| 1.4 MB 12.3 MB/s eta 0:00:00")
+        lines.append("     |████████████████████████████████| 1.4 MB 12.3 MB/s eta 0:00:00")
         lines.append(f"  Using cached {d}-1.2.3-py3-none-any.whl")
     for d in deps:
         lines.append(f"Requirement already satisfied: {d} in ./venv/lib/python3.11/site-packages")

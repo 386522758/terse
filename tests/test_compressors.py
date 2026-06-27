@@ -101,3 +101,22 @@ def test_detect_profile():
     assert C.detect_profile("echo hi") == "generic"
     assert C.detect_profile("") == "generic"
     assert C.detect_profile("/usr/local/bin/npm ci") == "npm"
+
+
+def test_detect_profile_python_dash_m():
+    assert C.detect_profile("python -m pytest -q") == "pytest"
+    assert C.detect_profile("python3 -m pytest") == "pytest"
+    assert C.detect_profile("python -m pip install requests") == "pip"
+    assert C.detect_profile("python -m http.server") == "generic"
+
+
+def test_resolve_carriage_returns_normalizes_crlf():
+    # CRLF input must survive: the trailing \r is a line ending, not a redraw.
+    text = "line one\r\nline two\r\nline three\r\n"
+    assert C.resolve_carriage_returns(text) == "line one\nline two\nline three\n"
+
+
+def test_resolve_carriage_returns_redraw_with_crlf():
+    # A real redraw still collapses to its final frame, even with CRLF endings.
+    text = "10%\r50%\r100%\r\ndone\r\n"
+    assert C.resolve_carriage_returns(text) == "100%\ndone\n"

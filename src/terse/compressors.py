@@ -43,7 +43,11 @@ def resolve_carriage_returns(text: str) -> str:
     A progress widget repaints a line by writing ``\\r`` and overwriting it.
     The captured buffer keeps every frame; only the text after the final
     ``\\r`` is what the user ultimately saw, so we keep just that.
+
+    CRLF line endings are normalized first; otherwise the trailing ``\\r`` of
+    every line would be mistaken for a redraw and wipe the line's content.
     """
+    text = text.replace("\r\n", "\n")
     out = []
     for line in text.split("\n"):
         if "\r" in line:
@@ -273,6 +277,13 @@ def detect_profile(command: str) -> str:
     exe = os.path.basename(parts[0]).lower()
     if exe.endswith(".exe"):
         exe = exe[:-4]
+
+    # `python -m pytest ...` / `python -m pip ...`: treat the module as the tool.
+    if exe in {"python", "python3", "py"} and "-m" in parts:
+        idx = parts.index("-m") + 1
+        if idx < len(parts):
+            exe = parts[idx].split(".")[0].lower()
+
     sub = parts[1].lower() if len(parts) > 1 else ""
 
     if exe in {"npm", "pnpm", "yarn", "bun"}:

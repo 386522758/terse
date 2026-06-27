@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "terse-cli"
 version = "0.1.0"
-description = "Compress noisy command output before it reaches your AI coding agent. 60-90% fewer tokens, zero dependencies."
+description = "Compress noisy command output before it reaches your AI coding agent. 60-95% fewer tokens, zero dependencies."
 readme = "README.md"
 requires-python = ">=3.8"
 license = { file = "LICENSE" }
@@ -19,7 +19,13 @@ classifiers = [
     "Environment :: Console",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Build Tools",
     "Topic :: Utilities",
 ]
@@ -33,7 +39,7 @@ Issues = "https://github.com/386522758/terse/issues"
 terse = "terse.cli:main"
 
 [project.optional-dependencies]
-dev = ["pytest>=7"]
+dev = ["pytest>=7", "ruff>=0.1"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -41,3 +47,7 @@ where = ["src"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py38"
+line-length = 100

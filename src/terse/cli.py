@@ -54,6 +54,13 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="do not strip ANSI color / control codes",
     )
+    parser.add_argument(
+        "--timeout",
+        type=float,
+        default=None,
+        metavar="SECS",
+        help="kill the wrapped command after SECS seconds (exit code 124)",
+    )
     stats = parser.add_mutually_exclusive_group()
     stats.add_argument(
         "--stats",
@@ -86,19 +93,37 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _capture(cmd: List[str]) -> "tuple[str, int]":
+def _capture(cmd: List[str], timeout: Optional[float] = None) -> "tuple[str, int]":
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,  # interleave stderr with stdout, in order
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=timeout,
+        )
     except FileNotFoundError:
         sys.stderr.write(f"terse: command not found: {cmd[0]}\n")
         raise SystemExit(127)
-    raw = proc.stdout
-    if proc.stderr:
-        raw = f"{raw}\n{proc.stderr}" if raw else proc.stderr
-    return raw, proc.returncode
+    except subprocess.TimeoutExpired as exc:
+        partial = exc.stdout or ""
+        if isinstance(partial, bytes):
+            partial = partial.decode("utf-8", "replace")
+        sys.stderr.write(f"terse: command timed out after {timeout:g}s\n")
+        return partial, 124
+    return proc.stdout, proc.returncode
 
 
 def main(argv: Optional[List[str]] = None) -> int:
+    # Best-effort: don't crash just because the console can't encode a glyph.
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(errors="replace")  # type: ignore[union-attr]
+        except (AttributeError, ValueError):
+            pass
+
     parser = _build_parser()
     args = parser.parse_args(sys.argv[1:] if argv is None else argv)
 
@@ -108,7 +133,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     if cmd:
         profile = args.profile or detect_profile(" ".join(cmd))
-        raw, exit_code = _capture(cmd)
+        raw, exit_code = _capture(cmd, timeout=args.timeout)
     else:
         if sys.stdin.isatty():
             parser.error("no command given and nothing piped to stdin")
